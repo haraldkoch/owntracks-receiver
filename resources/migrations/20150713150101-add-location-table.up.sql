@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS `location` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `acc` int(11) NOT NULL COMMENT 'accuracy, meters',
+  `alt` int(11) DEFAULT NULL COMMENT 'altitude, meters',
+  `batt` int(11) NOT NULL COMMENT 'battery, percent',
+  `cog` int(11) DEFAULT NULL COMMENT 'course over ground',
+  `descr` varchar(64) DEFAULT NULL,
+  `event` char(5) DEFAULT NULL,
+  `lat` double NOT NULL,
+  `lon` double NOT NULL,
+  `rad` int(11) DEFAULT NULL,
+  `t` char(1) NOT NULL,
+  `tid` char(5) NOT NULL,
+  `tst` int(10) unsigned NOT NULL,
+  `vac` int(11) DEFAULT NULL,
+  `vel` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `t` (`t`),
+  KEY `tid` (`tid`),
+  KEY `tst` (`tst`),
+  KEY `event` (`event`),
+  KEY `descr` (`descr`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;

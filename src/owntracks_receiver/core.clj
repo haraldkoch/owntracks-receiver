@@ -4,7 +4,8 @@
             [owntracks-receiver.db.migrations :as migrations]
             [clojure.tools.nrepl.server :as nrepl]
             [taoensso.timbre :as timbre]
-            [environ.core :refer [env]])
+            [environ.core :refer [env]]
+	    [owntracks-receiver.mqtt :as mqtt])
   (:gen-class))
 
 (defonce nrepl-server (atom nil))
@@ -52,10 +53,12 @@
 
 (defn stop-app []
   (stop-nrepl)
-  (stop-http-server))
+  (stop-http-server)
+  (mqtt/stop-subscriber))
 
 (defn start-app [[port]]
   (.addShutdownHook (Runtime/getRuntime) (Thread. stop-app))
+  (mqtt/start-subscriber)
   (start-nrepl)
   (start-http-server (http-port port))
   (timbre/info "server started on port:" (:port @server)))

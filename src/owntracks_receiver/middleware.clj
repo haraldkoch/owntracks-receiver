@@ -15,12 +15,7 @@
 (defn wrap-servlet-context [handler]
   (fn [request]
     (binding [*servlet-context*
-              (if-let [context (:servlet-context request)]
-                ;; If we're not inside a servlet environment
-                ;; (for example when using mock requests), then
-                ;; .getContextPath might not exist
-                (try (.getContextPath context)
-                     (catch IllegalArgumentException _ context)))]
+              (env :context-path)]
       (handler request))))
 
 (defn wrap-internal-error [handler]

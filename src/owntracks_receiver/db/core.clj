@@ -43,3 +43,6 @@
   (set-parameter [v ^PreparedStatement stmt idx]
     (.setTimestamp stmt idx (java.sql.Timestamp. (.getTime v)))))
 
+; these are here to get rid of IDEA undefined function warnings
+(declare store-message! store-location! store-waypoint! store-transition!)
+(declare get-recent-message get-recent-location get-waypoints get-transitions)

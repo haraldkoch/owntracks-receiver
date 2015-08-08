@@ -1,0 +1,16 @@
+#!/bin/sh
+
+version=`lein pprint :version|sed -e 's/\"//g'`
+name=`lein pprint :name|sed -e 's/\"//g'`
+
+# stop existing docker
+docker stop $name
+docker rm -v $name
+
+# silly tagging stuff
+docker rmi $name:latest
+docker tag $name:$version $name:latest
+
+# build new container
+# fixme: get ports from lein
+docker run -d --env-file docker.env -p 3002:3000 -p 7002:7001 --name=$name $name:latest
