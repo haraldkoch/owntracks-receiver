@@ -1,10 +1,11 @@
 # owntracks-receiver
 
 This is Harald's owntracks receiver playground. It's probably not useful to anyone
-else yet...
+else yet.
 
 ## TODO
 
+- generate views in CLJS instead of on server
 - store configuration in the database.
 - configuration of topics, etc. via web page.
 - all activity last 24 hours
