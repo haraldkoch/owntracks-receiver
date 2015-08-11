@@ -35,6 +35,10 @@
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [cljs-ajax "0.3.14"]
                  [org.immutant/web "2.0.2"]
+
+                 ; local additions
+                 [com.andrewmcveigh/cljs-time "0.3.11"]
+                 [json-html "0.3.4"]
                  [clojurewerkz/machine_head "1.0.0-beta9"]]
 
   :min-lein-version "2.0.0"

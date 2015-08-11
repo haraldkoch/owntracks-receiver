@@ -2,8 +2,9 @@
   (:require [owntracks-receiver.layout :as layout]
             [owntracks-receiver.db.core :as db]
             [compojure.core :refer [defroutes GET]]
-            [ring.util.http-response :refer [ok]]
+            [ring.util.http-response :refer :all]
             [hiccup.core :refer [html]]
+            [taoensso.timbre :as timbre]
             [clojure.java.io :as io]
             [clojure.data.json :as json]
             [clj-time.core :as t]
@@ -13,15 +14,16 @@
 (defn home-page []
   (layout/render "home.html"))
 
-(defn recent-page []
-  (let [last-loc (first (db/get-recent-location {:tid "HK"}))]
-    (layout/render "recent.html"
-                   {:html (html
-                            [:p "most recent location for " (:tid last-loc) " at " (:tst last-loc) [:br]
-                             [:a
-                              {:href (str "http://maps.google.com/?q=" (:lat last-loc) "," (:lon last-loc))}
-                              (str (:lat last-loc) "," (:lon last-loc))]]
-                            [:p "full update was" last-loc])})))
+(defmacro response-handler [fn-name args & body]
+  `(defn ~fn-name ~args
+     (try
+       (ok (do ~@body))
+       (catch Exception e#
+         (timbre/error "error handling request" e#)
+         (internal-server-error {:error (.getMessage e#)})))))
+
+(response-handler get-recent-locations [{:keys [params]}]
+                  (first (db/get-recent-location params)))
 
 (defn waypoints-page []
   (let [waypoints (db/get-waypoints)]
@@ -49,8 +51,7 @@
 
 (defroutes home-routes
            (GET "/" [] (home-page))
-           (GET "/recent" [] (recent-page))
            (GET "/waypoints" [] (waypoints-page))
            (GET "/transitions" [] (transitions-page))
-	   (GET "/docs" [] (ok (-> "docs/docs.md" io/resource slurp))))
-
+           (GET "/recent-locations" request (get-recent-locations request))
+           (GET "/docs" [] (ok (-> "docs/docs.md" io/resource slurp))))
