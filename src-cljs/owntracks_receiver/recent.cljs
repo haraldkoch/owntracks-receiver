@@ -24,17 +24,17 @@
 
 (defn draw-recent-locations
   "format the attribute list returned by an LDAP lookup in some sensible, readable fashion"
-  [last-loc]
+  [{:keys [tid tst lat lon] :as last-loc}]
   [:div
    [:div.row
     [:div.col-md-12
-     [:p "most recent location for " (last-loc "tid") " at " (last-loc "tst") ]]]
+     [:p "most recent location for " tid " at " tst ]]]
    [:div.location
     [:div.row
      [:div.col-md-12
       [:a
-       {:href (str "http://maps.google.com/?q=" (last-loc "lat") "," (last-loc "lon"))}
-       (str (last-loc "lat") "," (last-loc "lon"))]]]]
+       {:href (str "http://maps.google.com/?q=" lat "," lon)}
+       (str lat "," lon)]]]]
    ; debugging
    [:div.row (edn->hiccup last-loc)]])
 
@@ -62,7 +62,7 @@
   (when @result
     [:div.row
      [:div.col-md-12
-      [draw-recent-locations (merge  @result {"tst" (fmt-unix (@result "tst"))})]]]))
+      [draw-recent-locations (merge  @result {:tst (fmt-unix (:tst @result))})]]]))
 
 (defn recent-location-page []
   (let [tid (atom nil)
