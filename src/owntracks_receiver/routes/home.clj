@@ -25,12 +25,17 @@
 (response-handler get-recent-locations [{:keys [params]}]
                   (first (db/get-recent-location params)))
 
-(response-handler get-waypoints [{:keys [params]}]
-                  (first (db/get-waypoints params)))
-
 ; we should use the timezone of the browser for this
 (def date-formatter (f/with-zone (f/formatters :date-hour-minute-second) (t/default-time-zone)))
 (defn fmt-unix [u] (->> u (* 1000) (c/from-long) (f/unparse date-formatter)))
+
+(defn cvt-unix [u] (->> u (* 1000) (c/from-long) (c/to-date)))
+(defn format-waypoint
+  [w]
+  (merge w {:tst (cvt-unix (:tst w))}))
+
+(response-handler get-waypoints [{:keys [params]}]
+                  (map format-waypoint (db/get-waypoints params)))
 
 (defn format-transition [t]
   (merge t {:tst  (fmt-unix (:tst t))
