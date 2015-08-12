@@ -6,7 +6,8 @@
             [goog.history.EventType :as EventType]
             [markdown.core :refer [md->html]]
             [ajax.core :refer [GET POST]]
-            [owntracks-receiver.recent :refer [recent-location-page]])
+            [owntracks-receiver.recent :refer [recent-location-page]]
+            [owntracks-receiver.waypoints :refer [waypoints-page]])
   (:import goog.History))
 
 (defn navbar []
@@ -20,6 +21,8 @@
        [:a {:href "#/"} "Home"]]
       [:li {:class (when (= :recent-location (session/get :page)) "active")}
        [:a {:href "#/recent"} "Recent"]]
+      [:li {:class (when (= :waypoints (session/get :page)) "active")}
+       [:a {:href "#/waypoints"} "Waypoints"]]
       [:li {:class (when (= :about (session/get :page)) "active")}
        [:a {:href "#/about"} "About"]]]]]])
 
@@ -45,9 +48,10 @@
               {:__html (md->html docs)}}]]])])
 
 (def pages
-  {:home #'home-page
-   :recent-location  #'recent-location-page
-   :about #'about-page})
+  {:home            #'home-page
+   :recent-location #'recent-location-page
+   :waypoints       #'waypoints-page
+   :about           #'about-page})
 
 (defn page []
   [(pages (session/get :page))])
@@ -61,6 +65,9 @@
 
 (secretary/defroute "/recent" []
   (session/put! :page :recent-location))
+
+(secretary/defroute "/waypoints" []
+  (session/put! :page :waypoints))
 
 (secretary/defroute "/about" []
   (session/put! :page :about))

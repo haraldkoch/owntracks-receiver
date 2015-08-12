@@ -25,13 +25,8 @@
 (response-handler get-recent-locations [{:keys [params]}]
                   (first (db/get-recent-location params)))
 
-(defn waypoints-page []
-  (let [waypoints (db/get-waypoints)]
-    (layout/render "recent.html"
-                   {:html (html
-                            [:p "found " (count waypoints) " waypoints"]
-                            [:ul (for [waypoint waypoints]
-                                   [:li (json/write-str waypoint)])])})))
+(response-handler get-waypoints [{:keys [params]}]
+                  (first (db/get-waypoints params)))
 
 ; we should use the timezone of the browser for this
 (def date-formatter (f/with-zone (f/formatters :date-hour-minute-second) (t/default-time-zone)))
@@ -51,7 +46,7 @@
 
 (defroutes home-routes
            (GET "/" [] (home-page))
-           (GET "/waypoints" [] (waypoints-page))
+           (GET "/waypoints" request (get-waypoints request))
            (GET "/transitions" [] (transitions-page))
            (GET "/recent-locations" request (get-recent-locations request))
            (GET "/docs" [] (ok (-> "docs/docs.md" io/resource slurp))))

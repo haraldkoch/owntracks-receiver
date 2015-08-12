@@ -1,4 +1,4 @@
-(ns owntracks-receiver.recent
+(ns owntracks-receiver.waypoints
   (:require [reagent.core :as reagent :refer [atom]]
             [markdown.core :refer [md->html]]
             [ajax.core :refer [GET POST]]
@@ -9,12 +9,11 @@
             [cljs-time.coerce :as c]
             ))
 
-(defn fetch-recent-locations [tid result error]
-  (fetch "/recent-locations" {:tid @tid}
+(defn fetch-waypoints [result error]
+  (fetch "/waypoints"
          #(do
-           (println "tid " @tid " result" %)
+           (println "fetching waypoints")
            (reset! result %)
-           (reset! tid nil)
            )
          #(reset! error (get-in % [:response :error]))))
 
@@ -22,14 +21,14 @@
 (def date-formatter (f/formatters :date-hour-minute-second))
 (defn fmt-unix [u] (->> u (* 1000) (c/from-long) (f/unparse date-formatter)))
 
-(defn draw-recent-locations
+(defn draw-waypoints
   "format the attribute list returned by an LDAP lookup in some sensible, readable fashion"
   [last-loc]
   [:div
-   [:div.row
+   #_[:div.row
     [:div.col-md-12
      [:p "most recent location for " (last-loc "tid") " at " (last-loc "tst") ]]]
-   [:div.location
+   #_[:div.location
     [:div.row
      [:div.col-md-12
       [:a
@@ -38,38 +37,26 @@
    ; debugging
    [:div.row (edn->hiccup last-loc)]])
 
-(defn recent-location-search [tid result error]
+(defn waypoints-search [result error]
   [:div.row
    [:div.col-md-6
-    [:h2 "Recent Locations"]
-    [:div.input-group
-     [:label "TID:"]
-     [:input.form-control
-      {:type        :text
-       :value       @tid
-       :on-change   #(reset! tid (.-value (.-target %)))
-       ; this allows "Return" in the text box to trigger a search
-       :on-key-down #(case (.-which %)
-                      13 (fetch-recent-locations tid result error)
-                      "default")}]]
+    [:h2 "Waypoints"]
     [:span.input-group-btn
      [:button.btn.btn-primary
-      {:disabled (if (and (empty? @tid)) "true" nil)
-       :on-click #(fetch-recent-locations tid result error)}
-      "lookup"]]]])
+      {:on-click #(fetch-waypoints result error)}
+      "fetch waypoints"]]]])
 
-(defn recent-location-result [result]
+(defn waypoints-result [result]
   (when @result
     [:div.row
      [:div.col-md-12
-      [draw-recent-locations (merge  @result {"tst" (fmt-unix (@result "tst"))})]]]))
+      [draw-waypoints (merge @result {"tst" (fmt-unix (@result "tst"))})]]]))
 
-(defn recent-location-page []
-  (let [tid (atom nil)
-        result (atom nil)
+(defn waypoints-page []
+  (let [result (atom nil)
         error (atom nil)]
     (fn []
       [:div.container
-       [recent-location-search tid result error]
-       [recent-location-result result]
+       [waypoints-search result error]
+       [waypoints-result result]
        ])))
