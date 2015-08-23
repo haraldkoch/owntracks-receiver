@@ -4,10 +4,10 @@
   :url "http://example.com/FIXME"
 
   :dependencies [[org.clojure/clojure "1.7.0"]
-                 [selmer "0.8.8"]
-                 [com.taoensso/timbre "4.0.2"]
+                 [selmer "0.9.0"]
+                 [com.taoensso/timbre "4.1.1"]
                  [com.taoensso/tower "3.0.2"]
-                 [markdown-clj "0.9.67"]
+                 [markdown-clj "0.9.69"]
                  [environ "1.0.0"]
                  [compojure "1.4.0"]
                  [ring-webjars "0.1.1"]
@@ -22,14 +22,14 @@
                  [org.clojure/tools.nrepl "0.2.10"]
                  [org.webjars/bootstrap "3.3.5"]
                  [org.webjars/jquery "2.1.4"]
-                 [migratus "0.8.2"]
+                 [migratus "0.8.4"]
                  [conman "0.1.6"]
-                 [mysql/mysql-connector-java "5.1.6"]
-                 [org.clojure/clojurescript "1.7.58" :scope "provided"]
+                 [mysql/mysql-connector-java "5.1.34"]
+                 [org.clojure/clojurescript "1.7.107" :scope "provided"]
                  [org.clojure/tools.reader "0.9.2"]
-                 [reagent "0.5.0"]
+                 [reagent "0.5.1-rc"]
                  [cljsjs/react "0.13.3-1"]
-                 [reagent-forms "0.5.5"]
+                 [reagent-forms "0.5.6"]
                  [reagent-utils "0.1.5"]
                  [secretary "1.2.3"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
@@ -49,8 +49,7 @@
   :migratus {:store :database}
 
   :plugins [[lein-environ "1.0.0"]
-            [lein-ancient "0.6.5"]
-            [migratus-lein "0.1.5"]
+            [migratus-lein "0.1.7"]
             [lein-cljsbuild "1.0.6"]]
   :clean-targets ^{:protect false} [:target-path [:cljsbuild :builds :app :compiler :output-dir] [:cljsbuild :builds :app :compiler :output-to]]
   :cljsbuild
@@ -58,10 +57,10 @@
    {:app
     {:source-paths ["src-cljs"]
      :compiler
-     {:output-dir "resources/public/js/out"
+     {:output-to "resources/public/js/app.js"
+      :output-dir "resources/public/js/out"
       :externs ["react/externs/react.js"]
       :optimizations :none
-      :output-to "resources/public/js/app.js"
       :pretty-print true}}}}
   
   :profiles
@@ -88,7 +87,7 @@
                    :cljsbuild
                    {:builds
                     {:app
-                     {:source-paths ["env/dev/cljs"] :compiler {:source-map true}}}} 
+                     {:compiler {:source-map true} :source-paths ["env/dev/cljs"]}}} 
                   
                   :figwheel
                   {:http-server-root "public"

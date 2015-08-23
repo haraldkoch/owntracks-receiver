@@ -4,7 +4,8 @@
             [clojure.test :refer :all]
             [clojure.java.jdbc :as jdbc]
             [conman.core :refer [with-transaction]]
-            [environ.core :refer [env]]))
+            [environ.core :refer [env]])
+  (:import (java.util Date Calendar)))
 
 (use-fixtures
   :once
@@ -14,20 +15,22 @@
     (f)))
 
 (deftest test-users
-  (with-transaction [t-conn db/conn]
-    (jdbc/db-set-rollback-only! t-conn)
-    (is (= 1 (db/create-user!
-               {:id         "1"
-                :first_name "Sam"
-                :last_name  "Smith"
-                :email      "sam.smith@example.com"
-                :pass       "pass"})))
-    (is (= [{:id         "1"
-             :first_name "Sam"
-             :last_name  "Smith"
-             :email      "sam.smith@example.com"
-             :pass       "pass"
-             :admin      nil
-             :last_login nil
-             :is_active  nil}]
-           (db/get-user {:id "1"})))))
+  (let [now (Calendar/getInstance)
+        _ (.set now Calendar/MILLISECOND 0)
+        date (Date. (.getTimeInMillis now))]
+    (with-transaction
+      [t-conn db/conn]
+      (jdbc/db-set-rollback-only! t-conn)
+      (is (= 1 (db/store-message!
+                 {:time    date
+                  :topic   "test-topic"
+                  :message "{\"test\":\"fnord\"}"
+                  })))
+      (is (= {
+              :time    date
+              :topic   "test-topic"
+              :message "{\"test\":\"fnord\"}"
+              }
+             (select-keys
+               (first (db/get-recent-message {:topic "test-topic"}))
+               [:time :topic :message]))))))

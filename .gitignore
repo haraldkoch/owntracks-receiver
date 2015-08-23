@@ -10,6 +10,5 @@ profiles.clj
 /.env
 *.log
 resources/public/js
-/.idea
 .nrepl-port
 /docker.env
