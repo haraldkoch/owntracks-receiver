@@ -12,3 +12,4 @@ profiles.clj
 resources/public/js
 .nrepl-port
 /docker.env
+.travis/deploy_key.pem
