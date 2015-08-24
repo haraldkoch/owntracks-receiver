@@ -10,6 +10,6 @@ profiles.clj
 /.env
 *.log
 resources/public/js
-/.idea
 .nrepl-port
 /docker.env
+.travis/deploy_key.pem

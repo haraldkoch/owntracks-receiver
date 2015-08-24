@@ -1,4 +1,5 @@
-(ns owntracks-receiver.mqtt
+ (
+   ns owntracks-receiver.mqtt
   (:require [environ.core :refer [env]]
             [clojurewerkz.machine-head.client :as mh]
             [owntracks-receiver.db.core :as db]

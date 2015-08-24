@@ -1,11 +1,9 @@
 (ns owntracks-receiver.db.core
   (:require
-    [taoensso.timbre :as timbre]
     [clojure.java.jdbc :as jdbc]
     [conman.core :as conman]
     [environ.core :refer [env]])
-  (:import [java.sql BatchUpdateException
-            PreparedStatement]))
+  (:import [java.sql PreparedStatement]))
 
 (defonce ^:dynamic conn (atom nil))
 
@@ -45,4 +43,4 @@
 
 ; these are here to get rid of IDEA undefined function warnings
 (declare store-message! store-location! store-waypoint! store-transition!)
-(declare get-recent-message get-recent-location get-waypoints get-transitions)
+(declare get-message get-recent-message get-recent-location get-waypoints get-transitions)
