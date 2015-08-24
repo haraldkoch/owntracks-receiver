@@ -22,6 +22,12 @@
 (defn fmt-time [t]
   (->> t (c/from-date) (t/to-default-time-zone) (f/unparse my-formatter)))
 
+(defn error-component [error]
+  (when-let [error-text @error]
+    [:div.row
+     [:div.col-lg-6
+      [:div.alert.alert-danger error-text]]]))
+
 (defn draw-waypoints
   "display a list of Owntracks waypoints"
   [waypoints]
@@ -68,5 +74,6 @@
       (fetch-waypoints result error)
       [:div.container
        [waypoints-result result]
+       [error-component error]
        [waypoints-reload result error]
        ])))
