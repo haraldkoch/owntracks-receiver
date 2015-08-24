@@ -2,7 +2,7 @@
   (:require [reagent.core :as reagent :refer [atom]]
             [markdown.core :refer [md->html]]
             [ajax.core :refer [GET POST]]
-            [syseng-support.ajax :refer [fetch]]
+            [owntracks-receiver.ajax :refer [fetch]]
             [json-html.core :refer [edn->hiccup]]
             [cljs-time.core :as t]
             [cljs-time.format :as f]
@@ -36,20 +36,18 @@
     [:table.table.table-striped
      [:thead
       [:tr
-       [:th "Name"]
-       [:th "Latitude"]
-       [:th "Longitude"]
-       [:th "Timestamp"]]]
+       [:th "Name"] [:th "Latitude"] [:th "Longitude"] [:th "Timestamp"] [:th "TID"]]]
      (into [:tbody]
-           (for [{:keys [descr lat lon tst]} waypoints]
+           (for [{:keys [descr lat lon tst tid]} waypoints]
              [:tr
               [:td
                [:a
                 {:href (str "http://maps.google.com/?q=" lat "," lon)}
                 descr]]
-              [:td (gstring/format "%9.5f" lat)]
-              [:td (gstring/format "%9.5f" lon)]
-              [:td (fmt-time tst)]]))]]
+              [:td (gstring/format "%10.6f" lat)]
+              [:td (gstring/format "%11.6f" lon)]
+              [:td (fmt-time tst)]
+              [:td tid]]))]]
    #_[:div.row (edn->hiccup waypoints)]])
 
 (defn waypoints-reload [result error]

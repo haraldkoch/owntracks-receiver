@@ -43,4 +43,4 @@
 
 ; these are here to get rid of IDEA undefined function warnings
 (declare store-message! store-location! store-waypoint! store-transition!)
-(declare get-message get-recent-message get-recent-location get-waypoints get-transitions)
+(declare get-message get-recent-messages get-recent-locations get-waypoints get-transitions)

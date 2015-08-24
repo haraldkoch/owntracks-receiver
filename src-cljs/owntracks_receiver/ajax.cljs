@@ -1,4 +1,4 @@
--(ns syseng-support.ajax
+-(ns owntracks-receiver.ajax
   (:require [ajax.core :as client]))
 
 (defn fetch [url params handler & [error-handler]]

@@ -3,7 +3,7 @@
             [owntracks-receiver.db.core :as db]
             [compojure.core :refer [defroutes GET]]
             [ring.util.http-response :refer [ok internal-server-error]]
-	    [clojure.java.io :as io]
+            [clojure.java.io :as io]
             [hiccup.core :refer [html]]
             [taoensso.timbre :as timbre]
             [clojure.data.json :as json]
@@ -22,20 +22,19 @@
          (timbre/error "error handling request" e#)
          (internal-server-error {:error (.getMessage e#)})))))
 
-(response-handler get-recent-locations [{:keys [params]}]
-                  (first (db/get-recent-location params)))
-
 ; we should use the timezone of the browser for this
 (def date-formatter (f/with-zone (f/formatters :date-hour-minute-second) (t/default-time-zone)))
 (defn fmt-unix [u] (->> u (* 1000) (c/from-long) (f/unparse date-formatter)))
-
 (defn cvt-unix [u] (->> u (* 1000) (c/from-long) (c/to-date)))
-(defn format-waypoint
+(defn format-tst-field
   [w]
   (merge w {:tst (cvt-unix (:tst w))}))
 
+(response-handler get-recent-locations [{:keys [params]}]
+                  (map format-tst-field (db/get-recent-locations params)))
+
 (response-handler get-waypoints [{:keys [params]}]
-                  (map format-waypoint (db/get-waypoints params)))
+                  (map format-tst-field (db/get-waypoints params)))
 
 (defn format-transition [t]
   (merge t {:tst  (fmt-unix (:tst t))

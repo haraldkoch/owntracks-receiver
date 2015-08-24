@@ -4,13 +4,11 @@ INSERT INTO messages
 (time, topic, message)
 VALUES (:time, :topic, :message);
 
--- name: get-recent-message
+-- name: get-recent-messages
 -- fetch the most recent update for a given topic
-SELECT *
-FROM messages
+SELECT * FROM messages
 WHERE topic = :topic
-ORDER BY time DESC
-LIMIT 1;
+ORDER BY time DESC;
 
 -- name: store-location!
 -- store an owntracks location update
@@ -44,13 +42,11 @@ INSERT INTO location
 (acc, alt, batt, cog, descr, event, lat, lon, rad, t, tid, tst, vac, vel)
 VALUES (:acc, :alt, :batt, :cog, :desc, :event, :lat, :lon, :rad, :t, :tid, :tst, :vac, :vel);
 
--- name: get-recent-location
+-- name: get-recent-locations
 -- fetch the most recent location for a given user
-SELECT *
-FROM location
+SELECT * FROM location
 WHERE tid = :tid
-ORDER BY tst DESC
-LIMIT 1;
+ORDER BY tst DESC;
 
 -- name: store-waypoint!
 -- store an owntracks waypoint

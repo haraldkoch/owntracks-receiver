@@ -2,12 +2,11 @@
   (:require [reagent.core :as reagent :refer [atom]]
             [markdown.core :refer [md->html]]
             [ajax.core :refer [GET POST]]
-            [syseng-support.ajax :refer [fetch]]
+            [owntracks-receiver.ajax :refer [fetch]]
+            [owntracks-receiver.misc :as misc]
             [json-html.core :refer [edn->hiccup]]
-            [cljs-time.core :as t]
-            [cljs-time.format :as f]
-            [cljs-time.coerce :as c]
-            ))
+            [goog.string :as gstring]
+            [goog.string.format]))
 
 (defn fetch-recent-locations [tid result error]
   (fetch "/recent-locations" {:tid @tid}
@@ -18,25 +17,34 @@
            )
          #(reset! error (get-in % [:response :error]))))
 
-; we should use the timezone of the browser for this
-(def date-formatter (f/formatters :date-hour-minute-second))
-(defn fmt-unix [u] (->> u (* 1000) (c/from-long) (f/unparse date-formatter)))
+(def type-map
+  {""  "auto"
+   "a" "auto"
+   "b" "beacon"
+   "c" "transition"
+   "p" "ping"
+   "r" "report"
+   "t" "timer"
+   "u" "manual"})
 
 (defn draw-recent-locations
   "format the attribute list returned by an LDAP lookup in some sensible, readable fashion"
-  [{:keys [tid tst lat lon] :as last-loc}]
-  [:div
-   [:div.row
-    [:div.col-md-12
-     [:p "most recent location for " tid " at " tst ]]]
-   [:div.location
-    [:div.row
-     [:div.col-md-12
-      [:a
-       {:href (str "http://maps.google.com/?q=" lat "," lon)}
-       (str lat "," lon)]]]]
-   ; debugging
-   [:div.row (edn->hiccup last-loc)]])
+  [items]
+  [:div.row
+   [:div.col-md-12
+    [:table.table.table-striped
+     [:thead
+      [:tr
+       [:th "Timestamp"] [:th "Latitude"] [:th "Longitude"] [:th "Altitude"]
+       [:th "Batt"] [:th "Velocity"] [:th "Course"] [:th "Type"]]]
+     (into [:tbody]
+           (for [{:keys [tst lat lon alt batt vel cog t]} items]
+             [:tr
+              [:td [:a {:href (str "http://maps.google.com/?q=" lat "," lon)} (misc/fmt-time tst)]]
+              [:td (gstring/format "%10.6f" lat)] [:td (gstring/format "%11.6f" lon)]
+              [:td alt] [:td batt] [:td vel] [:td cog]
+              [:td (get-in type-map t)]
+              ]))]]])
 
 (defn recent-location-search [tid result error]
   [:div.row
@@ -62,13 +70,15 @@
   (when @result
     [:div.row
      [:div.col-md-12
-      [draw-recent-locations (merge  @result {:tst (fmt-unix (:tst @result))})]]]))
+      [draw-recent-locations @result]]]))
 
 (defn recent-location-page []
   (let [tid (atom nil)
         result (atom nil)
         error (atom nil)]
     (fn []
+      (reset! tid "HK")
+      (fetch-recent-locations tid result error)
       [:div.container
        [recent-location-search tid result error]
        [recent-location-result result]

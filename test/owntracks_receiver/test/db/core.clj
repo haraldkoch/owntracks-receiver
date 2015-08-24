@@ -32,5 +32,5 @@
               :message "{\"test\":\"fnord\"}"
               }
              (select-keys
-               (first (db/get-recent-message {:topic "test-topic"}))
+               (first (db/get-recent-messages {:topic "test-topic"}))
                [:time :topic :message]))))))
