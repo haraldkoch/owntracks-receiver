@@ -4,20 +4,32 @@
             [clojurewerkz.machine-head.client :as mh]
             [owntracks-receiver.db.core :as db]
             [clojure.data.json :as json]
-            [taoensso.timbre :as timbre]))
+            [taoensso.timbre :as timbre])
+  (:import [org.eclipse.paho.client.mqttv3 MqttException]))
 
 (defn now [] (java.util.Date.))
 
 (defonce conn (atom nil))
+(defonce clientid (mh/generate-id))
+
+(defn do-connect []
+  (mh/connect (env :mqtt-url) clientid
+              {:username (env :mqtt-user)
+               :password (env :mqtt-pass)}))
 
 (defn connect
   []
-  (let [id (mh/generate-id)
-        c (mh/connect (env :mqtt-url) id
-                      {:username (env :mqtt-user)
-                       :password (env :mqtt-pass)})]
-    (reset! conn c)
-    (timbre/info "MQTT connected to " (env :mqtt-url))))
+  (while (or (nil? @conn) (not (mh/connected? @conn)))
+    (try
+      (do
+        (reset! conn (do-connect))
+        (timbre/info "MQTT connected to " (env :mqtt-url)))
+      (catch MqttException e
+        (do
+          (timbre/error e "cannot connect to" (env :mqtt-url))
+          (Thread/sleep 15000))))))
+
+(declare connection-lost)
 
 ; SAMPLE MESSAGES
 ; owntracks/chk/phone {"cog":-1,"lon":-79.38180385869677,"acc":65,"vel":-1,"_type":"location","batt":80,"vac":25,"lat":43.65674740652509,"t":"c","tst":1436798255,"alt":129,"tid":"HK"}
@@ -83,13 +95,17 @@
   []
   (do
     (connect)
-    (mh/subscribe @conn {"owntracks/+/+" 1} handle-delivery {:on-connection-lost connect})
+    (mh/subscribe @conn {"owntracks/+/+" 1} handle-delivery {:on-connection-lost connection-lost})
     ; FIXME: should we just listen on + instead?
-    (mh/subscribe @conn {"owntracks/+/+/waypoint" 1} handle-delivery {:on-connection-lost connect})
-    (mh/subscribe @conn {"owntracks/+/+/event" 1} handle-delivery {:on-connection-lost connect})))
+    (mh/subscribe @conn {"owntracks/+/+/waypoint" 1} handle-delivery {:on-connection-lost connection-lost})
+    (mh/subscribe @conn {"owntracks/+/+/event" 1} handle-delivery {:on-connection-lost connection-lost})))
 
 (defn stop-subscriber
   []
   (do
     (mh/disconnect-and-close @conn)
     (reset! conn nil)))
+
+(defn connection-lost [reason]
+  (timbre/info reason "connection lost - reconnecting...")
+  (start-subscriber))
